@@ -1,6 +1,6 @@
 import os
 
-from common.common import init_drives, DriverExpand
+from common.common_func import init_drives, DriverExpand
 from xiaowu.addStudentAndPushXiaowu import AddStudent
 from xiaowu.login import Login
 

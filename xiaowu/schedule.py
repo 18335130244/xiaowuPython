@@ -1,4 +1,4 @@
-from common.common import init_drives, DriverExpand
+from common.common_func import init_drives, DriverExpand
 from createData import CreateData
 from xiaowu.addClass import AddClass
 from xiaowu.addStudentAndPushXiaowu import AddStudent

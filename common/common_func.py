@@ -27,13 +27,12 @@ class Utils:
 
 def create_time_name(operaName):
     timeStr = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime(int(time.time())))
-    path = 'D:\\project\\pythonProject\\selenuimDemo\\errorLog\\'
-    path = os.path.join(path, operaName)
+    path = os.path.dirname(os.path.dirname(__file__))
+    path = os.path.join(path, 'errorLog', operaName)
     if not os.path.exists(path):
         os.mkdir(path)
-    # 返回要保存的文件名字及路径 格式: errorLog/ 操作名字 / 具体操作时间
-    # return u'D:\\project\\pythonProject\\selenuimDemo\\errorLog\\' + operaName + '\\' + timeStr + '.png'
-    return u'' + path + '\\' + timeStr + '_' + operaName + '.png'
+    path = os.path.join(path, timeStr + '.png')
+    return path
 
 
 class DriverExpand(Utils):
@@ -80,7 +79,7 @@ class DriverExpand(Utils):
 
     # 与 浏览器 document.querySelector 相同作用
     def query_selector(self, CSSName):
-        return self.get_driver().find_element(By.CSS_SELECTOR, CSSName)
+        return self.get_driver().find_element(By.CSS_SELECTOR, CSSName).find_element()
 
     def query_selector_all(self, CSSName):
         return self.get_driver().find_elements(By.CSS_SELECTOR, CSSName)
@@ -195,12 +194,9 @@ def init_drives(browUrl, exe_path):
 
 
 if __name__ == '__main__':
-    num = input("请输入指令正确与否：")
-    if isinstance(num, int):
-        print("num是int类型")
-    elif isinstance(num, str):
-        print("num是str类型")
-    if isinstance(int(num), int):
-        print("int(num)是int类型")
-    elif isinstance(int(num), str):
-        print("int(num)是str类型")
+    # driverAddStudent = init_drives('https://uat-edurp.ambow.com/',
+    #                                "../../../myproject/testSeleuim/chromedriver_win32/chromedriver.exe")
+    #
+    # Login(driverAddStudent).xiao_wu_login('wei.xia@ambow.com', 'Ambow88888888')
+    a = create_time_name('sss')
+    print(a)

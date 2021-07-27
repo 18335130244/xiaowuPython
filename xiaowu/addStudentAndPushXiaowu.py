@@ -2,7 +2,7 @@ import time
 
 from xiaowu.login import Login
 
-from common.common import init_drives, DriverExpand
+from common.common_func import init_drives, DriverExpand
 from createData import CreateData
 
 
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     driverAddStudent = init_drives('https://uat-edurp.ambow.com/',
                                    "../../../myproject/testSeleuim/chromedriver_win32/chromedriver.exe")
 
-    Login(driverAddStudent).xiao_wu_login('wei.xia@ambow.com', 'Ambow88888888')
+    Login(driverAddStudent).xiao_wu_login('wei.xia@ambow.com', 'Ambow8888338888')
     # 全屏幕
     driverAddStudent.maximize_window()
     AddStudent(driverAddStudent).add_student('1')
