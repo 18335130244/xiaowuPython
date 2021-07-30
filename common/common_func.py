@@ -1,15 +1,21 @@
 import os
 import time
+import logging.config
 
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from common.webdriverWaitExpan import wait_for_the_attribute_value
+path1 = os.path.dirname(os.path.dirname(__file__))
+log_path = os.path.join(path1, "config/log.conf")
+logging.info(log_path)
+logging.config.fileConfig(log_path)
 
 
 class Utils:
@@ -35,13 +41,44 @@ def create_time_name(operaName):
     return path
 
 
+# 拓展 WebElement 方法
+class WebElementExpand(WebElement, Utils):
+
+    def __init__(self, parent, id_, w3c=False):
+        super().__init__(parent, id_, w3c)
+
+    def click(self):
+        # 拦截点击后 并等待 .2 秒
+        super().click()
+        self.wait_time(.2)
+
+    def send_keys(self, *value):
+        # 拦截赋值 并等待 .2 秒
+        WebElement.send_keys(self, value)
+        self.wait_time(.2)
+
+    def query_selector(self, CSSName):
+        return self.find_element(By.CSS_SELECTOR, CSSName)
+
+
+# 初始化 driver 类型
+class WebElementOp(WebDriver, Utils):
+
+    def __init__(self, executable_path, options):
+        # 增加父 类方法并增加方法拦截
+        super().__init__(executable_path=executable_path, options=options)
+
+    def create_web_element(self, element_id):
+        return WebElementExpand(self, element_id, w3c=self.w3c)
+
+
+# 基础复合合并类型
 class DriverExpand(Utils):
-    drivers: webdriver.Chrome
+    drivers: WebElementOp
     waitCommonTime = .2
 
     def __init__(self, driveInstant):
         self.drivers = driveInstant
-        print('DriverExpand')
 
     # 设置 浏览器驱动实例
     def init_drive(self, driveInstant):
@@ -68,21 +105,20 @@ class DriverExpand(Utils):
 
         for btnSearchKey in btNameList:
             i = btNameList.index(btnSearchKey)
-
+            logging.info('点击菜单+'+btnSearchKey)
             deep_node_click(btnSearchKey, i)
 
     # 保存操作失败截图
     def save_screen_file(self, operaName):
         # 元素寻找超时 截图保存
         if self.get_driver().get_screenshot_as_file(create_time_name(operaName)) is True:
-            print('保存_{}_操作图片成功'.format(operaName))
+            logging.info('保存_{}_操作图片成功'.format(operaName))
 
     # 获取驱动浏览器实例
     def get_driver(self):
         return self.drivers
 
-    # 与 浏览器 document.querySelector 相同作用
-    def query_selector(self, CSSName):
+    def query_selector(self, CSSName, logCb=None) -> WebElementExpand:
         return self.get_driver().find_element(By.CSS_SELECTOR, CSSName)
 
     def query_selector_all(self, CSSName):
@@ -98,7 +134,7 @@ class DriverExpand(Utils):
             el = WebDriverWait(self.get_driver(), times).until(EC.visibility_of_element_located((By.CSS_SELECTOR, loc)))
         except TimeoutException:
             self.save_screen_file(operaName)
-            print('寻找_{}_元素失败'.format(operaName))
+            logging.info('寻找_{}_元素失败'.format(operaName))
             return None
         else:
             return el.text
@@ -110,10 +146,10 @@ class DriverExpand(Utils):
             # WebDriverWait(self.get_driver(), times).until_not(EC.presence_of_element_located((By.CSS_SELECTOR, loc)))
         except TimeoutException:
             self.save_screen_file(operaName)
-            print('{}_元素依然在页面显示'.format(operaName))
+            logging.info('{}_元素依然在页面显示'.format(operaName))
             return None
         else:
-            print('{}_不在页面上显示'.format(operaName))
+            logging.info('{}_不在页面上显示'.format(operaName))
             self.wait_time(1)
             return True
 
@@ -123,10 +159,10 @@ class DriverExpand(Utils):
             el = WebDriverWait(self.get_driver(), times).until(EC.visibility_of_element_located((By.CSS_SELECTOR, loc)))
         except TimeoutException:
             self.save_screen_file(operaName)
-            print('元素_{}_不在页面上存在'.format(operaName))
+            logging.info('元素_{}_不在页面上存在'.format(operaName))
             return None
         else:
-            print('{}_元素存在'.format(operaName))
+            logging.info('{}_元素存在'.format(operaName))
             self.wait_time(.3)
             return el
 
@@ -138,12 +174,12 @@ class DriverExpand(Utils):
                 EC.visibility_of_element_located((By.CSS_SELECTOR, queryCssName)))
         except TimeoutException:
             self.save_screen_file(operaName)
-            print('执行元素点击操作_{}_错误'.format(operaName))
+            logging.info('执行元素点击操作_{}_错误'.format(operaName))
             return None
         else:
             self.wait_time(1)
             el.click()
-            print('执行元素点击操作_{}_成功'.format(operaName))
+            logging.info('执行元素点击操作_{}_成功'.format(operaName))
             return el
 
     # 检测元素属性
@@ -154,44 +190,22 @@ class DriverExpand(Utils):
                 wait_for_the_attribute_value(locator, attribute, value))
         except TimeoutException:
             self.save_screen_file(operaName)
-            print('执行元素点击操作_{}_错误'.format(operaName))
+            logging.info('执行元素点击操作_{}_错误'.format(operaName))
             return None
         else:
             self.wait_time(1)
             el.click()
-            print('执行元素点击操作_{}_成功'.format(operaName))
+            logging.info('执行元素点击操作_{}_成功'.format(operaName))
             return el
-
-
-class WebElementExpand(Utils, WebElement):
-    childSelf: None
-
-    def ini_child_self(self, childSelf):
-        self.childSelf = childSelf
-
-    def click(self):
-        # 拦截点击后 并等待 .2 秒
-        super().click()
-        self.wait_time(.2)
-
-    def send_keys(self, *value):
-        # 拦截赋值 并等待 .2 秒
-        WebElement.send_keys(self, value)
-        self.wait_time(.2)
-
-
-class WebElementOp(WebDriver, Utils):
-
-    def __init__(self, executable_path):
-        # 增加父 类方法并增加方法拦截
-        self._web_element_cls = WebElementExpand
-        super().__init__(executable_path)
 
 
 # 打开浏览器 并放回实例
 def init_drives(browUrl, exe_path):
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument("--window-size=4000,1600")
     # 打开 webDrive 代理器
-    driver = WebElementOp(executable_path=exe_path)
+    driver = WebElementOp(executable_path=exe_path, options=chrome_options)
     # 要被打开的链接
     driver.get(browUrl)
     return driver
@@ -203,4 +217,6 @@ if __name__ == '__main__':
     #
     # Login(driverAddStudent).xiao_wu_login('wei.xia@ambow.com', 'Ambow88888888')
     a = create_time_name('sss')
-    print(a)
+
+    logging.info('hhhhh')
+    logging.info(a)

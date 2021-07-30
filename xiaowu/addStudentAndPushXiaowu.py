@@ -4,6 +4,7 @@ from xiaowu.login import Login
 
 from common.common_func import init_drives
 from createData import CreateData
+import logging
 
 
 class AddStudent(CreateData):
@@ -24,23 +25,29 @@ class AddStudent(CreateData):
     def add_student(self, n):
         # 填写用户信息
         studentName = 'yjf-测试-内蒙古' + self.fake.name() + '_' + str(n)
-        print('新增学生' + studentName)
+        logging.info('新增学生' + studentName)
         self.wait_time(1)
         # 动态添加 学生
-        self.query_selector('#tab-2').click()
+        el = self.query_selector('#tab-2').click()
+        # el = self.check_displayed('点击招生中心', '#tab-2', times=1)
+        # el.click()
 
         # 传递需要名字
         self.button_show_click(["意向客户"])
-        
-        self.query_selector('.handle-box .el-button').click()
-        self.query_selector('input[placeholder="请输入客户名称"]').send_keys(studentName)
-        self.query_selector('input[placeholder="请输入联系电话"]').send_keys(self.fake.phone_number())
 
+        self.query_selector('.handle-box .el-button', logging.info('点击新增客户')).click()
+        # logging.info('点击新增客户')
+        self.query_selector('input[placeholder="请输入客户名称"]').send_keys(studentName)
+        logging.info('输入客户名称')
+        self.query_selector('input[placeholder="请输入联系电话"]').send_keys(self.fake.phone_number())
+        logging.info('输入联系电话')
         # 执行相同操作 跟进状态
         self.same_opera('contactStatus')
+        logging.info('选择跟进状态')
 
         # 执行相同操作 渠道选择
         self.same_opera('channel')
+        logging.info('选择渠道')
 
         # 执行相同操作 咨询校区/分公司
         self.query_selector('label[for="parentOrgChildOrg"]+.el-form-item__content .el-cascader').click()
@@ -49,15 +56,17 @@ class AddStudent(CreateData):
             self.query_selector('body>.el-popper .el-cascader-node')).perform()
         time.sleep(.2)
         self.query_selector('body>.el-popper .el-cascader-menu:nth-child(2) .el-cascader-node').click()
+        logging.info('选择咨询校区/分公司')
 
         # 保存按钮
         self.query_selector('footer button:nth-child(2)').click()
+        logging.info('保存')
 
         # 同步到校务
         self.element_click('同步到校务', '#customer .el-table__row .el-checkbox', 5)
         self.query_selector('#customer .handle-box:nth-child(2) .el-button:last-child').click()
 
-        print('新增' + studentName + '成功，同步校务完成')
+        logging.info('新增' + studentName + '成功，同步校务完成')
         # 返回学生名字
         return studentName
 
@@ -70,7 +79,7 @@ if __name__ == '__main__':
     Login(driverAddStudent).xiao_wu_login('wei.xia@ambow.com', 'Ambow88888888')
     # 全屏幕
     driverAddStudent.maximize_window()
-    print(AddStudent.__mro__)
+
     AddStudent(driverAddStudent).add_student('1')
 
     # 执行完毕后推出操作
