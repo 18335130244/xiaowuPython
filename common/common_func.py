@@ -39,6 +39,10 @@ class DriverExpand(Utils):
     drivers: webdriver.Chrome
     waitCommonTime = .2
 
+    def __init__(self, driveInstant):
+        self.drivers = driveInstant
+        print('DriverExpand')
+
     # 设置 浏览器驱动实例
     def init_drive(self, driveInstant):
         self.drivers = driveInstant
@@ -79,7 +83,7 @@ class DriverExpand(Utils):
 
     # 与 浏览器 document.querySelector 相同作用
     def query_selector(self, CSSName):
-        return self.get_driver().find_element(By.CSS_SELECTOR, CSSName).find_element()
+        return self.get_driver().find_element(By.CSS_SELECTOR, CSSName)
 
     def query_selector_all(self, CSSName):
         return self.get_driver().find_elements(By.CSS_SELECTOR, CSSName)

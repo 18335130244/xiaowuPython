@@ -2,17 +2,16 @@ import time
 
 from xiaowu.login import Login
 
-from common.common_func import init_drives, DriverExpand
+from common.common_func import init_drives
 from createData import CreateData
 
 
-class AddStudent(CreateData, DriverExpand):
+class AddStudent(CreateData):
 
     def __init__(self, drive):
         # 手动初始化浏览器 实例
-        self.init_drive(drive)
+        super().__init__(drive)
         # 手动初始化 自动生成数据
-        self.init_fake()
 
     def same_opera(self, forName, selectName='.el-select'):
         # 打开根进状态下拉框
@@ -68,9 +67,10 @@ if __name__ == '__main__':
     driverAddStudent = init_drives('https://uat-edurp.ambow.com/',
                                    "../../../myproject/testSeleuim/chromedriver_win32/chromedriver.exe")
 
-    Login(driverAddStudent).xiao_wu_login('wei.xia@ambow.com', 'Ambow8888338888')
+    Login(driverAddStudent).xiao_wu_login('wei.xia@ambow.com', 'Ambow88888888')
     # 全屏幕
     driverAddStudent.maximize_window()
+    print(AddStudent.__mro__)
     AddStudent(driverAddStudent).add_student('1')
 
     # 执行完毕后推出操作
